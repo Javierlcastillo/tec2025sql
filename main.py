@@ -1,12 +1,14 @@
 import sqlite3
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
 import os
 import re
+from tempfile import NamedTemporaryFile
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -15,6 +17,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 DB_PATH = "store.db"
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -97,3 +100,25 @@ def ask_question(req: QueryRequest):
         f"<div class='small' style='margin-top:18px; color:#555;'><b>Query SQL generado:</b><br><code style='font-size:0.95em'>{sql_query}</code></div>"
     )
     return {"response": respuesta}
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    # Guardar archivo temporalmente
+    with NamedTemporaryFile(delete=False, suffix="_rag_" + file.filename) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+    # Procesar el archivo con OpenAI (RAG)
+    # Aquí solo se usa el texto plano, para PDF/Word se requiere extracción de texto
+    # Ejemplo simple: enviar el contenido como contexto a OpenAI
+    try:
+        text = content.decode(errors='ignore')
+    except Exception:
+        text = str(content)
+    prompt = f"Eres un asistente experto. Responde la siguiente consulta usando el contexto del archivo proporcionado.\n\nContexto:\n{text}\n\nRespuesta:"
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    result = response.choices[0].message.content
+    return {"response": result}

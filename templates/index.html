@@ -158,12 +158,164 @@
         tr:nth-child(odd) {
             background: #fff;
         }
+
+        /* Estilos para modo oscuro */
+        body.dark-mode {
+            background: #181a1b;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .chat {
+            background: #23272a;
+            color: #e0e0e0;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .bubble {
+            background: #232c3b;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .bubble.user {
+            background: #1e3a2a;
+        }
+
+        body.dark-mode .table-scroll {
+            background: #23272a;
+        }
+
+        body.dark-mode table {
+            background: #23272a;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode th,
+        body.dark-mode td {
+            border-color: #444;
+        }
+
+        body.dark-mode tr:nth-child(even) {
+            background: #232c3b;
+        }
+
+        body.dark-mode tr:nth-child(odd) {
+            background: #23272a;
+        }
+
+        body.dark-mode button {
+            background: #444c5e;
+            color: #fff;
+        }
+
+        body.dark-mode button:hover {
+            background: #2563eb;
+        }
+
+        body.dark-mode #question {
+            background: #23272a;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .carousel-container {
+            width: 100vw;
+            max-width: 100vw;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .carousel {
+            position: relative;
+            width: 100vw;
+            max-width: 100vw;
+            height: 260px;
+            overflow: hidden;
+            border-radius: 0;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
+            background: #eee;
+        }
+
+        .carousel img {
+            width: 100vw;
+            max-width: 100vw;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 2em;
+            cursor: pointer;
+            z-index: 2;
+            transition: background 0.2s;
+        }
+
+        .carousel-btn.left {
+            left: 24px;
+        }
+
+        .carousel-btn.right {
+            right: 24px;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 700px) {
+            .carousel,
+            .carousel img {
+                height: 140px;
+            }
+
+            .carousel-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 1.2em;
+            }
+        }
+
+        body.dark-mode .carousel {
+            background: #23272a;
+        }
     </style>
 </head>
 
 <body>
+    <div class="carousel-container">
+        <div class="carousel">
+            <img id="carousel-img" src="./static/img1.jpg" alt="Imagen 1" />
+            <button class="carousel-btn left" onclick="prevImage()">&#10094;</button>
+            <button class="carousel-btn right" onclick="nextImage()">&#10095;</button>
+        </div>
+    </div>
     <div class="chat">
-        <h2 style="text-align:center; font-size:2em; margin-bottom: 20px;">🛍️ Asistente de Tienda IA</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px;">
+            <h2 style="text-align:center; font-size:2em; margin-bottom: 0;">🛍️ Asistente de Tienda IA</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="themeToggle" title="Cambiar tema" style="font-size:1.3em; padding: 8px 14px;">🌙</button>
+                <button id="downloadCSV" title="Descargar CSV" style="font-size:1.3em; padding: 8px 14px;">
+                    <span style="vertical-align:middle;">&#128190;</span> Descargar CSV
+                </button>
+                <button id="uploadFile" title="Subir archivo" style="font-size:1.3em; padding: 8px 14px;">
+                    <span style="vertical-align:middle;">&#128228;</span> Subir archivo
+                </button>
+                <input type="file" id="fileInput" style="display:none;" accept=".txt,.pdf,.doc,.docx,.csv" />
+            </div>
+        </div>
         <input id="question" placeholder="¿Qué productos se han vendido más?" style="width: 100%; padding: 12px;" />
         <button onclick="sendQuestion()">Preguntar</button>
         <div id="chatLog"></div>
@@ -173,6 +325,30 @@
     </div>
 
     <script>
+        // Carrusel de imágenes
+        const carouselImages = [
+            './static/img1.jpg', // Cambia estos nombres por los de tus imágenes
+            './static/img2.jpg',
+            './static/img3.jpg'
+        ];
+        let currentImg = 0;
+        const carouselImg = document.getElementById('carousel-img');
+
+        function showImage(idx) {
+            carouselImg.src = carouselImages[idx];
+            carouselImg.alt = `Imagen ${idx + 1}`;
+        }
+
+        function prevImage() {
+            currentImg = (currentImg - 1 + carouselImages.length) % carouselImages.length;
+            showImage(currentImg);
+        }
+
+        function nextImage() {
+            currentImg = (currentImg + 1) % carouselImages.length;
+            showImage(currentImg);
+        }
+
         function addMessage(content, isUser = false) {
             const div = document.createElement("div");
             div.className = "bubble" + (isUser ? " user" : "");
@@ -214,6 +390,46 @@
             showLoader(false);
         }
 
+        // Descargar tabla como CSV
+        function tableToCSV(table) {
+            let csv = [];
+            const rows = table.querySelectorAll('tr');
+            for (let row of rows) {
+                let cols = row.querySelectorAll('th, td');
+                let rowData = [];
+                for (let col of cols) {
+                    let text = col.innerText.replace(/\n/g, ' ').replace(/"/g, '""');
+                    rowData.push('"' + text + '"');
+                }
+                csv.push(rowData.join(','));
+            }
+            return csv.join('\n');
+        }
+        function downloadCSVFile(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        function showDownloadButtonIfTable() {
+            const chatLog = document.getElementById('chatLog');
+            const tables = chatLog.querySelectorAll('table');
+            const btn = document.getElementById('downloadCSV');
+            if (tables.length > 0) {
+                btn.disabled = false;
+                btn.onclick = function() {
+                    const csv = tableToCSV(tables[tables.length-1]);
+                    downloadCSVFile(csv, 'resultado.csv');
+                };
+            } else {
+                btn.disabled = true;
+                btn.onclick = null;
+            }
+        }
+        // Llama a esta función después de mostrar una respuesta
         async function typeResponse(html) {
             const container = document.createElement("div");
             container.className = "bubble";
@@ -221,10 +437,45 @@
             // Mostrar la respuesta de golpe, sin animación para evitar temblor en tablas
             container.innerHTML = html;
             container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            showDownloadButtonIfTable();
         }
 
         document.getElementById("question").addEventListener("keydown", function (e) {
             if (e.key === "Enter") sendQuestion();
+        });
+
+        // Dark mode toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.textContent = '☀️';
+            } else {
+                themeToggle.textContent = '🌙';
+            }
+        });
+        // Inicializar el estado del botón al cargar la página
+        showDownloadButtonIfTable();
+
+        // Subir archivo y enviarlo al backend
+        document.getElementById('uploadFile').onclick = function() {
+            document.getElementById('fileInput').click();
+        };
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                addMessage(`<b>Respuesta RAG:</b><br>${data.response}`);
+            } catch (err) {
+                addMessage('<span style="color:red">Error al subir el archivo.</span>');
+            }
         });
     </script>
 </body>
